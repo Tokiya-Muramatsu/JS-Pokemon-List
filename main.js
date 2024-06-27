@@ -4,6 +4,7 @@ const lists = document.getElementById("lists");
 
 // 1から呼び出す && ローカルストレージに保存
 let currentPokemonId = 1;
+let isLoading = false;
 
 // 関数
 function addList(pokemonData, speciesData) {
@@ -35,7 +36,7 @@ function addList(pokemonData, speciesData) {
     }).join(", ");
 
     const listItem = document.createElement('div');
-    
+
     // ポケモンの画像を追加
     if (pokemonImage) {
         const imgElement = document.createElement('img');
@@ -43,7 +44,7 @@ function addList(pokemonData, speciesData) {
         imgElement.alt = japaneseName;
         listItem.appendChild(imgElement);
     }
-    
+
     // ポケモンの名前を追加
     const nameElement = document.createElement('h3');
     nameElement.textContent = japaneseName;
@@ -55,7 +56,7 @@ function addList(pokemonData, speciesData) {
     listItem.appendChild(typeElement);
 
 
-    lists.appendChild(listItem);
+    lists.insertBefore(listItem, lists.firstChild);
 
     return pokemonData;
 }
@@ -90,8 +91,10 @@ async function getSpeciesData(pokemonData) {
 }
 
 async function listPokemon() {
-    
+    if (isLoading) return; // ローディング中は何もしない
+
     try {
+        isLoading = true; // ローディング中フラグセット
         const pokemonData = await getPokemon();
         const speciesData = await getSpeciesData(pokemonData);
         addList(pokemonData, speciesData); // addList関数にpokemonDataとspeciesDataを渡す
@@ -100,6 +103,8 @@ async function listPokemon() {
         currentPokemonId++;
     } catch (error) {
         console.error('ポケモンリストの作成中にエラーが発生しました。', error);
+    } finally {
+        isLoading = false; // ローディング中のフラグクリア
     }
 
 }
